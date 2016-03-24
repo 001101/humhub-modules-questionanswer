@@ -1,44 +1,34 @@
 <?php
 
+namespace humhub\modules\questionanswer\controllers;
+
+use humhub\modules\questionanswer\models\Answer;
+use humhub\modules\questionanswer\models\AnswerSearch;
+use humhub\modules\questionanswer\models\QuestionTag;
+use humhub\modules\questionanswer\models\Tag;
+use humhub\modules\questionanswer\models\Question;
+use humhub\modules\questionanswer\models\QuestionSearch;
+use humhub\modules\user\models\User;
+use Yii;
+//use humhub\modules\content\components\ContentContainerController;
+use humhub\components\Controller;
+use yii\helpers\Url;
+
 class AnswerController extends Controller
 {
 
 	/**
-	 * @return array action filters
-	 */
-	public function filters()
-	{
-		return array(
-			'accessControl', // perform access control for CRUD operations
-			'postOnly + delete', // we only allow deletion via POST request
-		);
-	}
-
-	/**
-	 * Specifies the access control rules.
-	 * This method is used by the 'accessControl' filter.
-	 * @return array access control rules
-	 */
-	public function accessRules()
-	{
-		return array(
-			array('allow',  // allow all users to perform 'index' and 'view' actions
-				'actions'=>array('index','view'),
-				'users'=>array('*'),
-			),
-			array('allow', // allow authenticated user to perform 'create' and 'update' actions
-				'actions'=>array('create','update'),
-				'users'=>array('@'),
-			),
-			array('allow', // allow admin user to perform 'admin' and 'delete' actions
-				'actions'=>array('admin','delete'),
-				'users'=>array('admin'),
-			),
-			array('deny',  // deny all users
-				'users'=>array('*'),
-			),
-		);
-	}
+     * @inheritdoc
+     */
+    public function behaviors()
+    {
+        return [
+            'acl' => [
+                'class' => \humhub\components\behaviors\AccessControl::className(),
+                'guestAllowedActions' => ['index', 'view']
+            ]
+        ];
+    }
 
 	/**
 	 * Displays a particular model.
@@ -46,7 +36,7 @@ class AnswerController extends Controller
 	 */
 	public function actionView($id)
 	{
-		$this->render('view',array(
+		return $this->render('view',array(
 			'model'=>$this->loadModel($id),
 		));
 	}
@@ -59,45 +49,25 @@ class AnswerController extends Controller
 	{
 		$answer = new Answer();
 
-		if(isset($_POST['Answer'])) {
+        if(isset($_POST['Answer'])) {
 
-			$this->forcePostRequest();
-            $_POST = Yii::app()->input->stripClean($_POST);
-
-            $answer->attributes=$_POST['Answer'];
-            $answer->content->populateByForm();
+            $answer->load(Yii::$app->request->post());
             $answer->post_type = "answer";
+
+
+            $containerClass = User::className();
+            $contentContainer = $containerClass::findOne(['guid' => Yii::$app->getUser()->guid]);
+            $answer->content->container = $contentContainer;
+            $answer->content->attachFileGuidsAfterSave = Yii::$app->request->post('fileList');
+
 
             if ($answer->validate()) {
 
-                $answer->save();
-                $this->redirect(array('//questionanswer/question/view','id'=>$answer->question_id));
-
+				$data = \humhub\modules\content\widgets\WallCreateContentForm::create($answer, $contentContainer);
+				$answer->save();
+                $this->redirect(Url::toRoute(['question/view', 'id' => $answer->question_id]));
             }
-
         }
-
-
-
-
-        /*$model=new Answer;
-
-		// Uncomment the following line if AJAX validation is needed
-		// $this->performAjaxValidation($model);
-
-		if(isset($_POST['Answer']))
-		{
-			$model->attributes=$_POST['Answer'];
-	        $model->created_by = Yii::app()->user->id;
-	        $model->post_type = "answer";
-
-			if($model->save())
-				$this->redirect(array('//questionanswer/question/view','id'=>$model->question_id));
-		}
-
-		$this->render('create',array(
-			'model'=>$model,
-		));*/
 	}
 
 	/**
@@ -107,19 +77,21 @@ class AnswerController extends Controller
 	 */
 	public function actionUpdate($id)
 	{
-		$model=$this->loadModel($id);
+		$id = Yii::$app->request->get('id');
+		$model = Answer::findOne(['id' => $id]);
 
-		// Uncomment the following line if AJAX validation is needed
-		// $this->performAjaxValidation($model);
+		$model->content->object_model = Answer::class;
+		$model->content->object_id = $model->id;
 
-		if(isset($_POST['Answer']))
-		{
-			$model->attributes=$_POST['Answer'];
-			if($model->save())
-				$this->redirect($this->createUrl('//questionanswer/question/view', array('id' => $model->question_id)));
+		$containerClass = User::className();
+		$contentContainer = $containerClass::findOne(['guid' => Yii::$app->getUser()->guid]);
+		$model->content->container = $contentContainer;
+
+		if ($model->load(Yii::$app->request->post()) && $model->validate() && $model->save()) {
+			$this->redirect(array('question/view','id'=>$model->question_id));
 		}
 
-		$this->render('update',array(
+		return $this->render('update',array(
 			'model'=>$model,
 		));
 	}
@@ -154,13 +126,13 @@ class AnswerController extends Controller
 	 */
 	public function actionAdmin()
 	{
-		$model=new Answer('search');
-		$model->unsetAttributes();  // clear any default values
-		if(isset($_GET['Answer']))
-			$model->attributes=$_GET['Answer'];
+		$searchModel = new AnswerSearch();
+		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-		$this->render('admin',array(
-			'model'=>$model,
+		return $this->render('../question/admin', array(
+			'dataProvider'  => $dataProvider,
+			'searchModel'   => $searchModel,
+			'model'         => Answer::find()
 		));
 	}
 
@@ -173,7 +145,7 @@ class AnswerController extends Controller
 	 */
 	public function loadModel($id)
 	{
-		$model=Answer::model()->findByPk($id);
+		$model=Answer::findOne(['id' => $id]);
 		if($model===null)
 			throw new CHttpException(404,'The requested page does not exist.');
 		return $model;
