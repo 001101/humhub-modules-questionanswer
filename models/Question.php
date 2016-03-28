@@ -58,7 +58,7 @@ class Question extends ContentActiveRecord implements Searchable
 
         return [
             [['post_title', 'post_text', 'post_type'], 'required'],
-            [['post_title', 'post_type'], 'string', 'max' => 255],
+			[['post_type'], 'string', 'max' => 255],
             [['created_at', 'updated_at'], 'safe'],
             [['created_by', 'updated_by'], 'integer'],
         ];

@@ -65,7 +65,7 @@ class Comment extends ActiveRecord
 	{
 		return [
 			[['post_text', 'post_type'], 'required'],
-			[['post_text', 'post_type'], 'string', 'max' => 255],
+			[['post_type'], 'string', 'max' => 255],
 			[['created_at', 'updated_at'], 'safe'],
 			[['question_id', 'parent_id', 'created_by', 'updated_by'], 'integer'],
 		];
