@@ -50,7 +50,7 @@ use humhub\modules\questionanswer\models\QuestionVotes;
         	<?php echo \yii\helpers\Html::a(\yii\helpers\Html::encode($data->post_title), array('view', 'id'=>$data->id)); ?>
         </h4>
 
-        <h5><?php echo \yii\helpers\Html::encode(\humhub\libs\Helpers::truncateText($data->post_text, 200)); ?></h5>
+        <h5><?php echo \yii\helpers\Html::a(\yii\helpers\Html::encode(\humhub\libs\Helpers::truncateText($data->post_text, 200)), array('view', 'id'=>$data->id)); ?></h5>
     </div>
 </div>
 
