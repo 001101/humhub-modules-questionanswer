@@ -47,10 +47,16 @@ use humhub\modules\questionanswer\models\QuestionVotes;
 
     <div class="media-body" style="padding-top:5px; padding-left:10px;">
         <h4 class="media-heading">
-        	<?php echo \yii\helpers\Html::a(\yii\helpers\Html::encode($data->post_title), array('view', 'id'=>$data->id)); ?>
+            <?php
+            if($data->post_title != "") {
+                echo \yii\helpers\Html::a(\yii\helpers\Html::encode($data->post_title), array('view', 'id'=>$data->id));
+            } else {
+                echo \yii\helpers\Html::a("...", array('view', 'id'=>$data->id));
+            }
+            ?>
         </h4>
 
-        <h5><?php echo \yii\helpers\Html::a(\yii\helpers\Html::encode(\humhub\libs\Helpers::truncateText($data->post_text, 200)), array('view', 'id'=>$data->id)); ?></h5>
+        <h5><?php echo \yii\helpers\Html::encode(\humhub\libs\Helpers::truncateText($data->post_text, 200)); ?></h5>
     </div>
 </div>
 
