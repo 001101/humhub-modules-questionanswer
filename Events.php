@@ -26,6 +26,20 @@ class Events extends \yii\base\Object
         ));
     }
 
+    public static function onSpaceMenuInit($event)
+    {
+        if ($event->sender->space !== null && $event->sender->space->isModuleEnabled('questionanswer') && $event->sender->space->isMember()) {
+            $event->sender->addItem(array(
+                'label' => "Q&A",
+                'group' => 'modules',
+                'url' => $event->sender->space->createUrl('//questionanswer/category/index'),
+                'icon' => '<i class="fa fa-stack-exchange"></i>',
+                'isActive' => (Yii::$app->controller->module && Yii::$app->controller->module->id == 'questionanswer'),
+            ));
+        }
+    }
+
+
     /**
      * Catch and dispatch events for AfterSave
      *
@@ -62,19 +76,7 @@ class Events extends \yii\base\Object
      */
     public static function onQuestionAfterSave($event)
     {
-
-
-//        foreach (Content::find()->all() as $content) {
-//            $contentObject = $content->getPolymorphicRelation();
-//            if ($contentObject instanceof \humhub\modules\search\interfaces\Searchable) {
-//                Yii::$app->search->add($contentObject);
-//            }
-//        }
-
         Karma::addKarma('asked', $event->sender->user->id);
-//        foreach (Question::find()->all() as $obj) {
-//            \Yii::$app->search->add($obj);
-//        }
     }
 
     /**
