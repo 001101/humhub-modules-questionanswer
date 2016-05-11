@@ -3,7 +3,6 @@
 namespace humhub\modules\questionanswer;
 
 use humhub\modules\content\models\Content;
-use humhub\modules\karma\models\Karma;
 use humhub\modules\questionanswer\models\Answer;
 use humhub\modules\questionanswer\models\Question;
 use humhub\modules\questionanswer\models\QuestionVotes;
@@ -25,6 +24,20 @@ class Events extends \yii\base\Object
             'isActive' => (Yii::$app->controller->module && Yii::$app->controller->module->id == 'questionanswer'),
         ));
     }
+
+    public static function onSpaceMenuInit($event)
+    {
+        if ($event->sender->space !== null && $event->sender->space->isModuleEnabled('questionanswer') && $event->sender->space->isMember()) {
+            $event->sender->addItem(array(
+                'label' => "Q&A",
+                'group' => 'modules',
+                'url' => $event->sender->space->createUrl('//questionanswer/category/index'),
+                'icon' => '<i class="fa fa-stack-exchange"></i>',
+                'isActive' => (Yii::$app->controller->module && Yii::$app->controller->module->id == 'questionanswer'),
+            ));
+        }
+    }
+
 
     /**
      * Catch and dispatch events for AfterSave
@@ -62,19 +75,9 @@ class Events extends \yii\base\Object
      */
     public static function onQuestionAfterSave($event)
     {
-
-
-//        foreach (Content::find()->all() as $content) {
-//            $contentObject = $content->getPolymorphicRelation();
-//            if ($contentObject instanceof \humhub\modules\search\interfaces\Searchable) {
-//                Yii::$app->search->add($contentObject);
-//            }
-//        }
-
-        Karma::addKarma('asked', $event->sender->user->id);
-//        foreach (Question::find()->all() as $obj) {
-//            \Yii::$app->search->add($obj);
-//        }
+        if(isset(Yii::$app->modules['karma'])) {
+            Karma::addKarma('asked', $event->sender->user->id);
+        }
     }
 
     /**
@@ -83,7 +86,9 @@ class Events extends \yii\base\Object
      */
     public static function onAnswerAfterSave($event)
     {
-        Karma::addKarma('answered', $event->sender->user->id);
+        if(isset(Yii::$app->modules['karma'])) {
+            Karma::addKarma('answered', $event->sender->user->id);
+        }
     }
 
     /**
@@ -107,19 +112,31 @@ class Events extends \yii\base\Object
                 // Only vote on questions and answers
                 switch($event->sender->vote_on) {
                     case "question":
-                        Karma::addKarma('question_up_vote', $event->sender->created_by);
-                        break;
+
+                        if(isset(Yii::  $app->modules['karma'])) {
+                            Karma::addKarma('question_up_vote', $event->sender->created_by);
+                        }
+
+                    break;
 
                     case "answer":
-                        Karma::addKarma('answer_up_vote', $event->sender->created_by);
-                        break;
+
+                        if(isset(Yii::$app->modules['karma'])) {
+                            Karma::addKarma('answer_up_vote', $event->sender->created_by);
+                        }
+                    break;
+
                 }
 
                 break;
 
             case "accepted_answer":
-                Karma::addKarma('accepted_answer', $event->sender->created_by);
-                break;
+
+                if(isset(Yii::$app->modules['karma'])) {
+                    Karma::addKarma('accepted_answer', $event->sender->created_by);
+                }
+
+            break;
 
         }
 
