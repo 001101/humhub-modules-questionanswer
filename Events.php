@@ -3,7 +3,6 @@
 namespace humhub\modules\questionanswer;
 
 use humhub\modules\content\models\Content;
-use humhub\modules\karma\models\Karma;
 use humhub\modules\questionanswer\models\Answer;
 use humhub\modules\questionanswer\models\Question;
 use humhub\modules\questionanswer\models\QuestionVotes;
@@ -76,7 +75,9 @@ class Events extends \yii\base\Object
      */
     public static function onQuestionAfterSave($event)
     {
-        Karma::addKarma('asked', $event->sender->user->id);
+        if(isset(Yii::$app->modules['karma'])) {
+            Karma::addKarma('asked', $event->sender->user->id);
+        }
     }
 
     /**
@@ -85,7 +86,9 @@ class Events extends \yii\base\Object
      */
     public static function onAnswerAfterSave($event)
     {
-        Karma::addKarma('answered', $event->sender->user->id);
+        if(isset(Yii::$app->modules['karma'])) {
+            Karma::addKarma('answered', $event->sender->user->id);
+        }
     }
 
     /**
@@ -109,19 +112,31 @@ class Events extends \yii\base\Object
                 // Only vote on questions and answers
                 switch($event->sender->vote_on) {
                     case "question":
-                        Karma::addKarma('question_up_vote', $event->sender->created_by);
-                        break;
+
+                        if(isset(Yii::  $app->modules['karma'])) {
+                            Karma::addKarma('question_up_vote', $event->sender->created_by);
+                        }
+
+                    break;
 
                     case "answer":
-                        Karma::addKarma('answer_up_vote', $event->sender->created_by);
-                        break;
+
+                        if(isset(Yii::$app->modules['karma'])) {
+                            Karma::addKarma('answer_up_vote', $event->sender->created_by);
+                        }
+                    break;
+
                 }
 
                 break;
 
             case "accepted_answer":
-                Karma::addKarma('accepted_answer', $event->sender->created_by);
-                break;
+
+                if(isset(Yii::$app->modules['karma'])) {
+                    Karma::addKarma('accepted_answer', $event->sender->created_by);
+                }
+
+            break;
 
         }
 
