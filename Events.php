@@ -3,6 +3,7 @@
 namespace humhub\modules\questionanswer;
 
 use humhub\modules\content\models\Content;
+use humhub\modules\karma\models\Karma;
 use humhub\modules\questionanswer\models\Answer;
 use humhub\modules\questionanswer\models\Question;
 use humhub\modules\questionanswer\models\QuestionVotes;

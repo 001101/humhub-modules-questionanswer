@@ -12,14 +12,37 @@ use humhub\modules\reportcontent\models\ReportContent;
 use humhub\modules\reportcontent\models\ReportReasonForm;
 use humhub\modules\user\models\User;
 use Yii;
-//use humhub\modules\content\components\ContentContainerController;
+use humhub\modules\content\components\ContentContainerController;
 use humhub\components\Controller;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Url;
+use yii\web\HttpException;
 
-class QuestionController extends Controller
+class QuestionController extends ContentContainerController
 {
 
+    /**
+     * When set to true, content from all spaces
+     * is combined into one view on the front page.
+     *
+     * When set to false, a Space acts as a category.
+     * It removes the ability to post globally. The front
+     * page changes to show the available categories.
+     */
+	public $useGlobalContentContainer = false;
+
+	public $hideSidebar = false;
+
+	public function init() {
+
+        // Expect exception from Content Container on global index page
+        try {
+            parent::init();
+        } catch(HttpException $e) {
+            // Do nothing.
+        }
+
+	}
     /**
      * @inheritdoc
      */
@@ -31,6 +54,38 @@ class QuestionController extends Controller
                 'guestAllowedActions' => ['index', 'view']
             ]
         ];
+    }
+
+    /**
+     * Lists all models.
+     */
+    public function actionIndex()
+    {
+
+        $searchModel = new QuestionSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider->setSort([
+            'defaultOrder' => [
+                'created_at'=>SORT_DESC
+            ]
+        ]);
+
+        if($this->useGlobalContentContainer) {
+
+            return $this->render('index', array(
+                'dataProvider' => $dataProvider,
+                'searchModel' => $searchModel,
+                'model' => Question::find()
+            ));
+
+        } else {
+            return $this->render('aggregated_index', array(
+            ));
+        }
+
+
+
+
     }
 
 	/**
@@ -63,13 +118,19 @@ class QuestionController extends Controller
 
         if(isset($_POST['Question'])) {
 
+
             $question->load(Yii::$app->request->post());
             $question->post_type = "question";
 
-            $containerClass = User::className();
-            $contentContainer = $containerClass::findOne(['guid' => Yii::$app->getUser()->guid]);
-            $question->content->container = $contentContainer;
-			
+            if($this->contentContainer) {
+                $question->content->setContainer($this->contentContainer);
+                $contentContainer = $this->contentContainer;
+            } else {
+                $containerClass = User::className();
+                $contentContainer = $containerClass::findOne(['guid' => Yii::$app->getUser()->guid]);
+                $question->content->container = $contentContainer;
+            }
+
 			$question->content->attachFileGuidsAfterSave = Yii::$app->request->post('fileList');
 
             if ($question->validate()) {
@@ -86,7 +147,6 @@ class QuestionController extends Controller
                     // Split tag string into array
                     $tags = explode(", ", $_POST['Tags']);
                     foreach($tags as $tag) {
-
                         $tag = Tag::firstOrCreate($tag, $contentContainer);
 						$question_tag = new QuestionTag();
                         $question_tag->question_id = $question->id;
@@ -150,27 +210,6 @@ class QuestionController extends Controller
 			$this->redirect(isset($_POST['returnUrl']) ? $_POST['returnUrl'] : array('admin'));
 	}
 
-	/**
-	 * Lists all models.
-	 */
-	public function actionIndex()
-	{
-
-        $searchModel = new QuestionSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        $dataProvider->setSort([
-            'defaultOrder' => [
-                'created_at'=>SORT_DESC
-            ]
-        ]);
-
-        return $this->render('index', array(
-            'dataProvider' => $dataProvider,
-            'searchModel' => $searchModel,
-            'model' => Question::find()
-        ));
-
-    }
 
 	/** 
 	 * Find unanswered questions
