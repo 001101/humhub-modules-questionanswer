@@ -9,7 +9,7 @@ use humhub\modules\file\widgets\ShowFiles;
 use yii\helpers\Url;
 use yii\helpers\Html;
 ?>
-<div class="container">
+<div class="container-fluid">
     <div class="row">
         <div class="col-md-9">
             <div class="panel panel-default qanda-panel" style="padding:25px; padding-left:15px;">

@@ -72,7 +72,7 @@ class Category extends ActiveRecord
                     $groups[$parts[self::GROUP_NAME_POSITION]][] = [
                         'name' => $parts[self::CATEGORY_NAME_POSITION],
                         'description' => $category->space->description,
-                        'link' => $category->space->createUrl('//questionanswer/category/index')
+                        'link' => $category->space->createUrl('//questionanswer/question/index')
                     ];
                 }
 

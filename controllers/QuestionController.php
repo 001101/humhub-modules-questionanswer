@@ -33,8 +33,20 @@ class QuestionController extends ContentContainerController
      */
 	public $useGlobalContentContainer = false;
 
-	public $hideSidebar = false;
+    /**
+     * We want the sidebar hidden,
+     * this module has it's own sidebars
+     *
+     * @var bool
+     */
+	public $hideSidebar = true;
 
+    /**
+     * Handle initialisation.
+     *
+     * This module works globally and within a Space container
+     * We do this so we can work around not having a content container.
+     */
 	public function init() {
 
         // Expect exception from Content Container on global index page
@@ -64,32 +76,31 @@ class QuestionController extends ContentContainerController
     public function actionIndex()
     {
 
-        $searchModel = new QuestionSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        $dataProvider->setSort([
-            'defaultOrder' => [
-                'created_at'=>SORT_DESC
-            ]
+        $query = Question::find()
+            ->andFilterWhere(['post_type' => 'question'])
+            ->orderBy('created_at DESC');
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
         ]);
+        
+        // Pass the content container to the query when available and not using the global content container
+        if($this->contentContainer) {
+            $query->contentContainer($this->contentContainer);
+        }
 
-        if($this->useGlobalContentContainer) {
-
-            return $this->render('index', array(
-                'dataProvider' => $dataProvider,
-                'searchModel' => $searchModel,
-                'model' => Question::find()
-            ));
-
-        } else {
-
-            // Array of all our groups and categories
+        // Return the aggregated view when useGlobalContentContainer == false AND no content container found
+        if(!$this->useGlobalContentContainer && !$this->contentContainer) {
             return $this->render('aggregated_index', array(
                 'groups' => Category::all(),
             ));
         }
 
-
-
+        return $this->render('index', array(
+            'dataProvider' => $dataProvider,
+            'searchModel' => $query,
+            'model' => Question::find()
+        ));
 
     }
 
