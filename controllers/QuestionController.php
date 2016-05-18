@@ -4,12 +4,14 @@ namespace humhub\modules\questionanswer\controllers;
 
 use humhub\modules\content\models\Content;
 use humhub\modules\questionanswer\models\Answer;
+use humhub\modules\questionanswer\models\Category;
 use humhub\modules\questionanswer\models\QuestionTag;
 use humhub\modules\questionanswer\models\Tag;
 use humhub\modules\questionanswer\models\Question;
 use humhub\modules\questionanswer\models\QuestionSearch;
 use humhub\modules\reportcontent\models\ReportContent;
 use humhub\modules\reportcontent\models\ReportReasonForm;
+use humhub\modules\space\behaviors\SpaceModelModules;
 use humhub\modules\user\models\User;
 use Yii;
 use humhub\modules\content\components\ContentContainerController;
@@ -79,7 +81,10 @@ class QuestionController extends ContentContainerController
             ));
 
         } else {
+
+            // Array of all our groups and categories
             return $this->render('aggregated_index', array(
+                'groups' => Category::all(),
             ));
         }
 
