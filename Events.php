@@ -32,7 +32,7 @@ class Events extends \yii\base\Object
             $event->sender->addItem(array(
                 'label' => "Q&A",
                 'group' => 'modules',
-                'url' => $event->sender->space->createUrl('//questionanswer/category/index'),
+                'url' => $event->sender->space->createUrl('//questionanswer/question/index'),
                 'icon' => '<i class="fa fa-stack-exchange"></i>',
                 'isActive' => (Yii::$app->controller->module && Yii::$app->controller->module->id == 'questionanswer'),
             ));
