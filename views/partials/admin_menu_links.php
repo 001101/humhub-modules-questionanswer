@@ -1,6 +1,6 @@
 <?php
 use yii\helpers\Html;
-use yii\helpers\Url;
+use humhub\modules\questionanswer\helpers\Url;
 ?>
 
 <?php if(Yii::$app->user->isAdmin()) { ?>
@@ -12,13 +12,13 @@ use yii\helpers\Url;
     ?>
     <ul class="nav nav-tabs qanda-header-tabs" id="filter">
         <li class="dropdown <?php echo ($isQuestion ? "active" : ""); ?>">
-            <?php echo Html::a('Questions', Url::toRoute('question/admin'), ['style' => 'cursor: pointer;']); ?>
+            <?php echo Html::a('Questions', Url::createUrl('question/admin'), ['style' => 'cursor: pointer;']); ?>
         </li>
         <li class="dropdown <?php echo ($isAnswer ? "active" : ""); ?>">
-            <?php echo Html::a('Answers', Url::toRoute('answer/admin'), ['style' => 'cursor: pointer;']); ?>
+            <?php echo Html::a('Answers', Url::createUrl('answer/admin'), ['style' => 'cursor: pointer;']); ?>
         </li>
         <li class="dropdown <?php echo ($isComment ? "active" : ""); ?>">
-            <?php echo Html::a('Comments', Url::toRoute('comment/admin'), ['style' => 'cursor: pointer;']); ?>
+            <?php echo Html::a('Comments', Url::createUrl('comment/admin'), ['style' => 'cursor: pointer;']); ?>
         </li>
     </ul>
 <?php } ?>

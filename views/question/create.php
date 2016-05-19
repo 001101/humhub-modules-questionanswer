@@ -7,7 +7,7 @@ use yii\data\ActiveDataProvider;
 ?>
 
 <?php $form = \yii\widgets\ActiveForm::begin(); ?>
-<div class="container">
+<div class="container-fluid">
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">

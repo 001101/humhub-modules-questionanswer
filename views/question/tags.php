@@ -16,7 +16,7 @@ use humhub\modules\questionanswer\models\QuestionVotes;
     }
 
 </style>
-<div class="container">
+<div class="container-fluid">
     <div class="row">
         <div class="col-md-12">
             <h3 class="text-center">Questions Tagged: <?php echo $tag->tag; ?></h3>
