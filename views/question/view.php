@@ -221,7 +221,7 @@ use yii\helpers\Html;
                             if(Yii::$app->user->isAdmin()) {
                                 echo \humhub\modules\questionanswer\widgets\DeleteButtonWidget::widget([
                                     'id' => 'answer_'.$question_answer['id'],
-                                    'deleteRoute' => URL::createUrl(['answer/delete', 'id' => $question_answer['id']]),
+                                    'deleteRoute' => URL::createUrl('answer/delete', ['id' => $question_answer['id']]),
                                     'title' => '<strong>Confirm</strong> delete answer',
                                     'message' => 'Are you sure want to delete this answer?',
                                 ]);
