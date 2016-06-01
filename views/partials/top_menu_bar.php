@@ -2,8 +2,17 @@
 use humhub\modules\questionanswer\helpers\Url;
 use yii\helpers\Html;
 use yii\grid\GridView;
-
 use yii\data\ActiveDataProvider;
+
+
+$tags = \humhub\modules\questionanswer\models\Tag::find();
+
+// Apply content container, if used.
+if($this->context->contentContainer && $this->context->useGlobalContentContainer == false) {
+    $tags->contentContainer($this->context->contentContainer);
+}
+
+
 ?>
 <div class="panel-heading">
     <ul class="nav nav-tabs qanda-header-tabs">
@@ -21,7 +30,9 @@ use yii\data\ActiveDataProvider;
             <a class="dropdown-toggle" data-toggle="dropdown" href="#">Tags <b class="caret"></b></a>
             <ul class="dropdown-menu">
                 <?php
-                $tags = \humhub\modules\questionanswer\models\Tag::find()->all();
+                // Get all tags
+                $tags = $tags->all();
+
                 if(!$tags) {
                     echo "<li><a href=\"#\" class=\"wallFilter\">No tags found</a></li>";
                 } else {
