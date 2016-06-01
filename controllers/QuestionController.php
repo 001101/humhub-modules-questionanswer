@@ -273,6 +273,8 @@ class QuestionController extends ContentContainerController
 		// Apply content filter to results
 		if($this->contentContainer && $this->useGlobalContentContainer == false) {
 			$criteria = "AND content.space_id = " . $this->contentContainer->id;
+		} else {
+			$criteria = "";
 		}
 
 		$sql = 'SELECT question.id, question.post_title, question.post_text, question.post_type, COUNT(*) as tag_count
@@ -375,9 +377,17 @@ class QuestionController extends ContentContainerController
 
 		$tag = Tag::findOne(['id' => Yii::$app->request->get('id')]);
 
+		// Apply content filter to results
+		if($this->contentContainer && $this->useGlobalContentContainer == false) {
+			$container = $this->contentContainer;
+		} else {
+			$container = null;
+		}
+
+
 		return $this->render('tags', array(
 			'tag' => $tag,
-			'questions' => Question::tag_overview($tag->id)
+			'questions' => Question::tag_overview($tag->id, $container)
 		));
 
 	}
