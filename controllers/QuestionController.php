@@ -270,11 +270,16 @@ class QuestionController extends ContentContainerController
 	public function actionPicked()
 	{
 
+		// Apply content filter to results
+		if($this->contentContainer && $this->useGlobalContentContainer == false) {
+			$criteria = "AND content.space_id = " . $this->contentContainer->id;
+		}
 
 		$sql = 'SELECT question.id, question.post_title, question.post_text, question.post_type, COUNT(*) as tag_count
-				FROM question
+				FROM content, question
 				LEFT JOIN question_tag ON (question.id = question_tag.question_id)
-				WHERE question_tag.tag_id IN (
+				WHERE (content.object_id = question.id AND content.object_model LIKE "humhub\\\\\\\\modules\\\\\\\\questionanswer\\\\\\\\models\\\\\\\\Question" '. $criteria .')
+				AND question_tag.tag_id IN (
 					SELECT id as tag_id FROM (
 						SELECT tag.id
 						FROM tag, question_votes, question
@@ -294,7 +299,8 @@ class QuestionController extends ContentContainerController
 					) as c
 					GROUP BY id
 					ORDER BY COUNT(tag_id) DESC, question.created_at DESC
-				)';
+				)
+				';
 
 
 
