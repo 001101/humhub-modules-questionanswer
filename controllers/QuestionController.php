@@ -235,11 +235,24 @@ class QuestionController extends ContentContainerController
 
 		$criteria = Question::find();
 		$criteria->select("question.id, question.post_title, question.post_text, question.post_type, COUNT(DISTINCT answers.id) as answers, (COUNT(DISTINCT up.id) - COUNT(DISTINCT down.id)) as score, (COUNT(DISTINCT up.id) + COUNT(DISTINCT down.id)) as vote_count, COUNT(DISTINCT up.id) as up_votes, COUNT(DISTINCT down.id) as down_votes");
-		$criteria->from('question');
+		$criteria->from(['content', 'question']);
 		$criteria->join('LEFT JOIN', 'question_votes up', "question.id = up.post_id AND up.vote_on = 'question' AND up.vote_type='up'");
 		$criteria->join('LEFT JOIN', 'question_votes down', "question.id = down.post_id AND down.vote_on = 'question' AND down.vote_type = 'down'");
 		$criteria->join('LEFT JOIN', 'question answers', "question.id = answers.question_id AND answers.post_type = 'answer'");
-		$criteria->where(['question.post_type' => 'question']);
+		$criteria->where([
+			'question.post_type' => 'question'
+		]);
+
+		// Apply content filter to results
+		if($this->contentContainer && $this->useGlobalContentContainer == false) {
+
+			$criteria->andWhere('content.object_id = question.id');
+			$criteria->andWhere(['like', 'content.object_model', "humhub\\modules\\questionanswer\\models\\Question"]);
+			$criteria->andWhere([
+				'content.space_id' => $this->contentContainer->id
+			]);
+		}
+
 		$criteria->groupBy("question.id");
 		$criteria->having("answers = 0");
 		$criteria->orderBy("score DESC, vote_count DESC, question.created_at DESC");
