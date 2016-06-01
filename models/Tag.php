@@ -109,7 +109,7 @@ class Tag extends ContentActiveRecord implements Searchable
 	{
 
 
-		$foundTag = Tag::find()->where('tag=:tag', array('tag'=>$tag))->one();
+		$foundTag = Tag::find()->contentContainer($contentContainer)->where('tag=:tag', array('tag'=>$tag))->one();
 
 		if($foundTag) { // found tag
 			return $foundTag;
