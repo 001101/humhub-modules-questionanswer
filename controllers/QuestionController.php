@@ -323,14 +323,28 @@ class QuestionController extends ContentContainerController
 	 */
 	public function actionAdmin()
 	{
-        $searchModel = new QuestionSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        return $this->render('admin', array(
-            'dataProvider'  => $dataProvider,
-            'searchModel'   => $searchModel,
-            'model'         => Question::find()
-        ));
+		$query = Question::find()
+			->andFilterWhere(['post_type' => 'question'])
+			->orderBy('created_at DESC');
+
+		$dataProvider = new ActiveDataProvider([
+			'query' => $query,
+		]);
+
+		// Pass the content container to the query when available and not using the global content container
+		if($this->contentContainer && $this->useGlobalContentContainer == false) {
+			$query->contentContainer($this->contentContainer);
+		}
+
+		return $this->render('admin', array(
+			'dataProvider' => $dataProvider,
+			'searchModel' => $query,
+			'model' => Question::find()
+		));
+
+
+
 	}
 
 	/**
