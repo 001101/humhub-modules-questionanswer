@@ -19,6 +19,11 @@ return [
             'callback' => ['humhub\modules\questionanswer\Events', 'onSpaceMenuInit']
         ],
         [
+            'class' => \humhub\modules\admin\widgets\AdminMenu::className(),
+            'event' => \humhub\modules\admin\widgets\AdminMenu::EVENT_INIT,
+            'callback' => ['humhub\modules\questionanswer\Events', 'onAdminMenuInit']
+        ],
+        [
             'class' => \humhub\components\ActiveRecord::className(),
             'event' => \humhub\components\ActiveRecord::EVENT_AFTER_INSERT,
             'callback' => ['humhub\modules\questionanswer\Events', 'onActiveRecordAfterSave'],

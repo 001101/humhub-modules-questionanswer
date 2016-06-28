@@ -2,6 +2,7 @@
 
 namespace humhub\modules\questionanswer\controllers;
 
+use humhub\models\Setting;
 use humhub\modules\content\models\Content;
 use humhub\modules\questionanswer\models\Answer;
 use humhub\modules\questionanswer\models\Category;
@@ -31,7 +32,8 @@ class QuestionController extends ContentContainerController
      * It removes the ability to post globally. The front
      * page changes to show the available categories.
      */
-	public $useGlobalContentContainer = false;
+	public $useGlobalContentContainer = true;
+
 
     /**
      * We want the sidebar hidden,
@@ -48,6 +50,14 @@ class QuestionController extends ContentContainerController
      * We do this so we can work around not having a content container.
      */
 	public function init() {
+
+
+        // Use content container set in settings, global by default
+        if(Setting::GetText('useGlobalContentContainer') == null || Setting::GetText('useGlobalContentContainer') == 1) {
+            $this->useGlobalContentContainer = true;
+        } else {
+            $this->useGlobalContentContainer = false;
+        }
 
         // Expect exception from Content Container on global index page
         try {

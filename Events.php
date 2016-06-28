@@ -15,6 +15,23 @@ use yii\helpers\Url;
 class Events extends \yii\base\Object
 {
 
+    /**
+     * Defines what to do if admin menu is initialized.
+     *
+     * @param type $event
+     */
+    public static function onAdminMenuInit($event)
+    {
+        $event->sender->addItem(array(
+            'label' => "Q&A",
+            'url' => Url::to(['/questionanswer/setting']),
+            'group' => 'manage',
+            'icon' => '<i class="fa fa-stack-exchange"></i>',
+            'isActive' => (Yii::$app->controller->module && Yii::$app->controller->module->id == 'questionanswer' && Yii::$app->controller->id == 'setting'),
+            'sortOrder' => 510,
+        ));
+    }
+
     public static function onTopMenuInit($event)
     {
         $event->sender->addItem(array(
