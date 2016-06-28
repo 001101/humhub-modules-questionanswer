@@ -6,10 +6,11 @@ use \humhub\modules\questionanswer\models\Comment;
 use humhub\modules\questionanswer\widgets\VoteButtonWidget;
 use humhub\modules\questionanswer\widgets\ProfileWidget;
 use humhub\modules\file\widgets\ShowFiles;
-use yii\helpers\Url;
+use humhub\modules\questionanswer\helpers\Url;
 use yii\helpers\Html;
+
 ?>
-<div class="container">
+<div class="container-fluid">
     <div class="row">
         <div class="col-md-9">
             <div class="panel panel-default qanda-panel" style="padding:25px; padding-left:15px;">
@@ -58,12 +59,12 @@ use yii\helpers\Html;
 
                         <div class="media-body" style="padding-top:5px; ">
                             <h3 class="media-heading">
-                                <?php echo Html::a(Html::encode($model->post_title), Url::toRoute(['question/view', 'id' => $model->id])); ?>
+                                <?php echo Html::a(Html::encode($model->post_title), Url::createUrl('question/view', ['id' => $model->id])); ?>
                             </h3>
                             <?php print Html::encode($model->post_text); ?>
                             <br /><br />
                             <?php foreach($model->tags as $tag) { ?>
-                                <span class="label label-default"><a href="<?php echo Url::toRoute(['question/tag', 'id' => $tag->tag_id]); ?>"><?php echo $tag->tag->tag; ?></a></span>
+                                <span class="label label-default"><a href="<?php echo Url::createUrl('question/tag', ['id' => $tag->tag_id]); ?>"><?php echo $tag->tag->tag; ?></a></span>
                             <?php } ?>
                             <br /><br />
                             <?php
@@ -74,25 +75,25 @@ use yii\helpers\Html;
                                 foreach($comments as $comment) {
                                     echo '<div style="border-bottom:1px solid #d8d8d8; padding: 4px;">';
                                     print Html::encode($comment->post_text);
-                                    echo " &bull; <a href=\"". Url::toRoute(['/user/profile', 'uguid' => $comment->user->guid]) . "\">" . $comment->user->displayName . "</a>";
-                                    
+                                    echo " &bull; <a href=\"". Url::createUrl('/user/profile', ['uguid' => $comment->user->guid]) . "\">" . $comment->user->displayName . "</a>";
+
                                     echo "<small>";
                                     if(Yii::$app->user->isAdmin() || $comment->created_by == Yii::$app->user->id) {
                                         echo " &#8212; ";
-                                        echo Html::a("Edit", array('comment/update', 'id'=>$comment->id));
+                                        echo Html::a("Edit", Url::createUrl('comment/update', ['id'=>$comment->id]));
                                     }
-                                    
+
                                     if(Yii::$app->user->isAdmin()) {
                                         echo " &bull; ";
                                         echo \humhub\modules\questionanswer\widgets\DeleteButtonWidget::widget([
                                             'id' => 'comment_'.$comment->id,
-                                            'deleteRoute' => URL::toRoute(['comment/delete', 'id' => $comment->id]),
+                                            'deleteRoute' => URL::createUrl('comment/delete', ['id' => $comment->id]),
                                             'title' => '<strong>Confirm</strong> delete comment',
                                             'message' => 'Do you really want to delete this comment?',
                                         ]);
                                     }
                                     echo "</small>";
-                                    
+
                                     echo '</div>';
                                 }
                                 echo "</div>";
@@ -105,7 +106,7 @@ use yii\helpers\Html;
                             ?>
                             <?php
                             if(Yii::$app->user->isAdmin() || $model->created_by == Yii::$app->user->id) {
-                            	echo Html::a("Edit", array('update', 'id'=>$model->id));
+                            	echo Html::a("Edit", Url::createUrl('update', ['id'=>$model->id]));
                             }
                             ?>
                             &bull;
@@ -113,7 +114,7 @@ use yii\helpers\Html;
 						    if(Yii::$app->user->isAdmin()) {
                                 echo \humhub\modules\questionanswer\widgets\DeleteButtonWidget::widget([
                                     'id' => 'question_'.$model->id,
-                                    'deleteRoute' => URL::toRoute(['question/delete', 'id' => $model->id]),
+                                    'deleteRoute' => URL::createUrl('question/delete', ['id' => $model->id]),
                                     'title' => '<strong>Confirm</strong> delete question',
                                     'message' => 'Do you really want to delete this question? All answers will be lost!',
                                 ]);
@@ -134,7 +135,7 @@ use yii\helpers\Html;
                     <div class="media">
                         <div class="pull-left">
                             <div class="vote_control pull-left" style="padding:5px; padding-right:10px; border-right:1px solid #eee; margin-right:10px;">
-                                <?php 
+                                <?php
                                 $upBtnClass = ""; $downBtnClass = "";
                                 $vote = QuestionVotes::findOne(['post_id' => $question_answer['id'], 'created_by' => Yii::$app->user->id]);
                                 if($vote) {
@@ -182,19 +183,19 @@ use yii\helpers\Html;
                                     echo '<div style="border-bottom:1px solid #d8d8d8; padding: 4px;">';
                                     print Html::encode($comment->post_text);
 
-                                    echo " &bull; <a href=\"". \yii\helpers\Url::toRoute(['/user/profile', 'uguid' => $comment->user->guid]) . "\">" . $comment->user->displayName . "</a>";
-                                    
+                                    echo " &bull; <a href=\"". \yii\helpers\Url::createUrl(['/user/profile', 'uguid' => $comment->user->guid]) . "\">" . $comment->user->displayName . "</a>";
+
                                     echo "<small>";
                                     if(Yii::$app->user->isAdmin() || $comment->created_by == Yii::$app->user->id) {
                                         echo " &#8212; ";
                                         echo Html::a("Edit", array('//questionanswer/comment/update', 'id'=>$comment->id));
                                     }
-                                    
+
                                     if(Yii::$app->user->isAdmin()) {
                                         echo " &bull; ";
                                         echo \humhub\modules\questionanswer\widgets\DeleteButtonWidget::widget([
                                             'id' => 'comment_'.$comment->id,
-                                            'deleteRoute' => URL::toRoute(['comment/delete', 'id' => $comment->id]),
+                                            'deleteRoute' => URL::createUrl(['comment/delete', 'id' => $comment->id]),
                                             'title' => '<strong>Confirm</strong> delete comment',
                                             'message' => 'Are you sure want to delete this comment?',
                                         ]);
@@ -210,7 +211,7 @@ use yii\helpers\Html;
                             <?php
                             echo \humhub\modules\questionanswer\widgets\CommentFormWidget::widget(array('model' => new Comment, 'question_id' => $question_answer['question_id'], 'parent_id' => $question_answer['id']));
                             ?>
-                            <?php 
+                            <?php
                             if(Yii::$app->user->isAdmin() || $question_answer['created_by'] == Yii::$app->user->id) {
                                 echo Html::a("Edit", array('//questionanswer/answer/update', 'id'=>$question_answer['id']));
                             }
@@ -220,7 +221,7 @@ use yii\helpers\Html;
                             if(Yii::$app->user->isAdmin()) {
                                 echo \humhub\modules\questionanswer\widgets\DeleteButtonWidget::widget([
                                     'id' => 'answer_'.$question_answer['id'],
-                                    'deleteRoute' => URL::toRoute(['answer/delete', 'id' => $question_answer['id']]),
+                                    'deleteRoute' => URL::createUrl('answer/delete', ['id' => $question_answer['id']]),
                                     'title' => '<strong>Confirm</strong> delete answer',
                                     'message' => 'Are you sure want to delete this answer?',
                                 ]);
@@ -230,7 +231,7 @@ use yii\helpers\Html;
                         </div>
 
                     </div>
-                    
+
                 </div>
             </div>
             <?php } ?>
@@ -243,13 +244,13 @@ use yii\helpers\Html;
         </div>
 
         <div class="col-md-3">
-            
+
             <div class="panel panel-default">
                 <div class="panel-heading"><strong>Related</strong> Questions</div>
                 <?php if(count($related) > 0) { ?>
                     <div class="list-group">
                         <?php foreach ($related as $question) { ?>
-                            <a class="list-group-item" href="<?php echo Url::toRoute(['question/view', 'id' => $question['id']]); ?>"><?php echo Html::encode($question['post_title']); ?></a>
+                            <a class="list-group-item" href="<?php echo Url::createUrl('question/view', ['id' => $question['id']]); ?>"><?php echo Html::encode($question['post_title']); ?></a>
                         <?php } ?>
                     </div>
                     <br>

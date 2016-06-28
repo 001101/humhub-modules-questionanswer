@@ -2,24 +2,71 @@
 
 namespace humhub\modules\questionanswer\controllers;
 
+use humhub\models\Setting;
 use humhub\modules\content\models\Content;
 use humhub\modules\questionanswer\models\Answer;
+use humhub\modules\questionanswer\models\Category;
 use humhub\modules\questionanswer\models\QuestionTag;
 use humhub\modules\questionanswer\models\Tag;
 use humhub\modules\questionanswer\models\Question;
 use humhub\modules\questionanswer\models\QuestionSearch;
 use humhub\modules\reportcontent\models\ReportContent;
 use humhub\modules\reportcontent\models\ReportReasonForm;
+use humhub\modules\space\behaviors\SpaceModelModules;
 use humhub\modules\user\models\User;
 use Yii;
-//use humhub\modules\content\components\ContentContainerController;
+use humhub\modules\content\components\ContentContainerController;
 use humhub\components\Controller;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Url;
+use yii\web\HttpException;
 
-class QuestionController extends Controller
+class QuestionController extends ContentContainerController
 {
 
+    /**
+     * When set to true, content from all spaces
+     * is combined into one view on the front page.
+     *
+     * When set to false, a Space acts as a category.
+     * It removes the ability to post globally. The front
+     * page changes to show the available categories.
+     */
+	public $useGlobalContentContainer = true;
+
+
+    /**
+     * We want the sidebar hidden,
+     * this module has it's own sidebars
+     *
+     * @var bool
+     */
+	public $hideSidebar = true;
+
+    /**
+     * Handle initialisation.
+     *
+     * This module works globally and within a Space container
+     * We do this so we can work around not having a content container.
+     */
+	public function init() {
+
+
+        // Use content container set in settings, global by default
+        if(Setting::GetText('useGlobalContentContainer') == null || Setting::GetText('useGlobalContentContainer') == 1) {
+            $this->useGlobalContentContainer = true;
+        } else {
+            $this->useGlobalContentContainer = false;
+        }
+
+        // Expect exception from Content Container on global index page
+        try {
+            parent::init();
+        } catch(HttpException $e) {
+            // Do nothing.
+        }
+
+	}
     /**
      * @inheritdoc
      */
@@ -31,6 +78,40 @@ class QuestionController extends Controller
                 'guestAllowedActions' => ['index', 'view']
             ]
         ];
+    }
+
+    /**
+     * Lists all models.
+     */
+    public function actionIndex()
+    {
+
+        $query = Question::find()
+            ->andFilterWhere(['post_type' => 'question'])
+            ->orderBy('created_at DESC');
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+        
+        // Pass the content container to the query when available and not using the global content container
+        if($this->contentContainer) {
+            $query->contentContainer($this->contentContainer);
+        }
+
+        // Return the aggregated view when useGlobalContentContainer == false AND no content container found
+        if(!$this->useGlobalContentContainer && !$this->contentContainer) {
+            return $this->render('aggregated_index', array(
+                'groups' => Category::all(),
+            ));
+        }
+
+        return $this->render('index', array(
+            'dataProvider' => $dataProvider,
+            'searchModel' => $query,
+            'model' => Question::find()
+        ));
+
     }
 
 	/**
@@ -63,13 +144,19 @@ class QuestionController extends Controller
 
         if(isset($_POST['Question'])) {
 
+
             $question->load(Yii::$app->request->post());
             $question->post_type = "question";
 
-            $containerClass = User::className();
-            $contentContainer = $containerClass::findOne(['guid' => Yii::$app->getUser()->guid]);
-            $question->content->container = $contentContainer;
-			
+            if($this->contentContainer) {
+                $question->content->setContainer($this->contentContainer);
+                $contentContainer = $this->contentContainer;
+            } else {
+                $containerClass = User::className();
+                $contentContainer = $containerClass::findOne(['guid' => Yii::$app->getUser()->guid]);
+                $question->content->container = $contentContainer;
+            }
+
 			$question->content->attachFileGuidsAfterSave = Yii::$app->request->post('fileList');
 
             if ($question->validate()) {
@@ -86,7 +173,6 @@ class QuestionController extends Controller
                     // Split tag string into array
                     $tags = explode(", ", $_POST['Tags']);
                     foreach($tags as $tag) {
-
                         $tag = Tag::firstOrCreate($tag, $contentContainer);
 						$question_tag = new QuestionTag();
                         $question_tag->question_id = $question->id;
@@ -150,27 +236,6 @@ class QuestionController extends Controller
 			$this->redirect(isset($_POST['returnUrl']) ? $_POST['returnUrl'] : array('admin'));
 	}
 
-	/**
-	 * Lists all models.
-	 */
-	public function actionIndex()
-	{
-
-        $searchModel = new QuestionSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        $dataProvider->setSort([
-            'defaultOrder' => [
-                'created_at'=>SORT_DESC
-            ]
-        ]);
-
-        return $this->render('index', array(
-            'dataProvider' => $dataProvider,
-            'searchModel' => $searchModel,
-            'model' => Question::find()
-        ));
-
-    }
 
 	/** 
 	 * Find unanswered questions
@@ -180,11 +245,24 @@ class QuestionController extends Controller
 
 		$criteria = Question::find();
 		$criteria->select("question.id, question.post_title, question.post_text, question.post_type, COUNT(DISTINCT answers.id) as answers, (COUNT(DISTINCT up.id) - COUNT(DISTINCT down.id)) as score, (COUNT(DISTINCT up.id) + COUNT(DISTINCT down.id)) as vote_count, COUNT(DISTINCT up.id) as up_votes, COUNT(DISTINCT down.id) as down_votes");
-		$criteria->from('question');
+		$criteria->from(['content', 'question']);
 		$criteria->join('LEFT JOIN', 'question_votes up', "question.id = up.post_id AND up.vote_on = 'question' AND up.vote_type='up'");
 		$criteria->join('LEFT JOIN', 'question_votes down', "question.id = down.post_id AND down.vote_on = 'question' AND down.vote_type = 'down'");
 		$criteria->join('LEFT JOIN', 'question answers', "question.id = answers.question_id AND answers.post_type = 'answer'");
-		$criteria->where(['question.post_type' => 'question']);
+		$criteria->where([
+			'question.post_type' => 'question'
+		]);
+
+		// Apply content filter to results
+		if($this->contentContainer && $this->useGlobalContentContainer == false) {
+
+			$criteria->andWhere('content.object_id = question.id');
+			$criteria->andWhere(['like', 'content.object_model', "humhub\\modules\\questionanswer\\models\\Question"]);
+			$criteria->andWhere([
+				'content.space_id' => $this->contentContainer->id
+			]);
+		}
+
 		$criteria->groupBy("question.id");
 		$criteria->having("answers = 0");
 		$criteria->orderBy("score DESC, vote_count DESC, question.created_at DESC");
@@ -202,11 +280,18 @@ class QuestionController extends Controller
 	public function actionPicked()
 	{
 
+		// Apply content filter to results
+		if($this->contentContainer && $this->useGlobalContentContainer == false) {
+			$criteria = "AND content.space_id = " . $this->contentContainer->id;
+		} else {
+			$criteria = "";
+		}
 
 		$sql = 'SELECT question.id, question.post_title, question.post_text, question.post_type, COUNT(*) as tag_count
-				FROM question
+				FROM content, question
 				LEFT JOIN question_tag ON (question.id = question_tag.question_id)
-				WHERE question_tag.tag_id IN (
+				WHERE (content.object_id = question.id AND content.object_model LIKE "humhub\\\\\\\\modules\\\\\\\\questionanswer\\\\\\\\models\\\\\\\\Question" '. $criteria .')
+				AND question_tag.tag_id IN (
 					SELECT id as tag_id FROM (
 						SELECT tag.id
 						FROM tag, question_votes, question
@@ -226,7 +311,8 @@ class QuestionController extends Controller
 					) as c
 					GROUP BY id
 					ORDER BY COUNT(tag_id) DESC, question.created_at DESC
-				)';
+				)
+				';
 
 
 
@@ -247,14 +333,28 @@ class QuestionController extends Controller
 	 */
 	public function actionAdmin()
 	{
-        $searchModel = new QuestionSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        return $this->render('admin', array(
-            'dataProvider'  => $dataProvider,
-            'searchModel'   => $searchModel,
-            'model'         => Question::find()
-        ));
+		$query = Question::find()
+			->andFilterWhere(['post_type' => 'question'])
+			->orderBy('created_at DESC');
+
+		$dataProvider = new ActiveDataProvider([
+			'query' => $query,
+		]);
+
+		// Pass the content container to the query when available and not using the global content container
+		if($this->contentContainer && $this->useGlobalContentContainer == false) {
+			$query->contentContainer($this->contentContainer);
+		}
+
+		return $this->render('admin', array(
+			'dataProvider' => $dataProvider,
+			'searchModel' => $query,
+			'model' => Question::find()
+		));
+
+
+
 	}
 
 	/**
@@ -301,9 +401,17 @@ class QuestionController extends Controller
 
 		$tag = Tag::findOne(['id' => Yii::$app->request->get('id')]);
 
+		// Apply content filter to results
+		if($this->contentContainer && $this->useGlobalContentContainer == false) {
+			$container = $this->contentContainer;
+		} else {
+			$container = null;
+		}
+
+
 		return $this->render('tags', array(
 			'tag' => $tag,
-			'questions' => Question::tag_overview($tag->id)
+			'questions' => Question::tag_overview($tag->id, $container)
 		));
 
 	}

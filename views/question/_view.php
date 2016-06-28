@@ -3,6 +3,7 @@
 /* @var $data Question */
 use humhub\modules\questionanswer\models\Question;
 use humhub\modules\questionanswer\models\QuestionVotes;
+use humhub\modules\questionanswer\helpers\Url;
 ?>
 <div class="media" >
     <div class="pull-left">
@@ -49,9 +50,9 @@ use humhub\modules\questionanswer\models\QuestionVotes;
         <h4 class="media-heading">
             <?php
             if($data->post_title != "") {
-                echo \yii\helpers\Html::a(\yii\helpers\Html::encode($data->post_title), array('view', 'id'=>$data->id));
+                echo \yii\helpers\Html::a(\yii\helpers\Html::encode($data->post_title), Url::createUrl('view', ['id'=>$data->id]));
             } else {
-                echo \yii\helpers\Html::a("...", array('view', 'id'=>$data->id));
+                echo \yii\helpers\Html::a("...", Url::createUrl('view', ['id'=>$data->id]));
             }
             ?>
         </h4>

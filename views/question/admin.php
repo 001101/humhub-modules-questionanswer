@@ -46,7 +46,7 @@ $('.search-form form').submit(function(){
 </style>
 
 
-<div class="container">
+<div class="container-fluid">
     <div class="row">
         <div class="col-md-12">
 	        <div class="panel qanda-panel">
