@@ -48,7 +48,7 @@ class m150617_104132_initial extends Migration
 	{
         $this->dropTable('question');
         $this->dropTable('question_votes');
-        $this->dropTable('tags');
+        $this->dropTable('tag');
         $this->dropTable('question_tags');
 	}
 
