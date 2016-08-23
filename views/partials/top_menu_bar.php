@@ -1,6 +1,6 @@
 <?php
 /**
- * Connected Communities
+ * Connected Communities Initiative
  * Copyright (C) 2016  Queensland University of Technology
  *
  * This program is free software: you can redistribute it and/or modify
