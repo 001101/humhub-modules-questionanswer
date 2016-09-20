@@ -36,7 +36,7 @@ $isSpace = is_a($container, Space::className());
 
                 <?php if($isSpace) { ?>
 
-                    <?php if($container->canWrite()) { ?>
+                    <?php if($container->permissionManager->can(new \humhub\modules\post\permissions\CreatePost())) { ?>
 
                         <?php echo $this->render('_create.php', [
                             'form' => $form,
