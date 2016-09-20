@@ -88,6 +88,7 @@ class Category extends ActiveRecord
 
                 if(count($parts) == self::EXPECTED_NUMBER_OF_PARTS) {// we only ever expect 2 parts.
                     $groups[$parts[self::GROUP_NAME_POSITION]][] = [
+                        'space' => $category->space,
                         'name' => $parts[self::CATEGORY_NAME_POSITION],
                         'description' => $category->space->description,
                         'link' => $category->space->createUrl('//questionanswer/question/index')

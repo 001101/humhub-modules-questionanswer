@@ -346,7 +346,13 @@ class Question extends ContentActiveRecord implements Searchable
 		return $this->post_title;
 	}
 
-	public function canWrite() {
-		return true;
+	/**
+	 * Find questions inside a contaienr (space)
+	 *
+	 * @param $container
+	 */
+	public static function findByContainer($container)
+	{
+		return self::find()->andWhere(['question.post_type' => 'question'])->contentContainer($container);
 	}
 }
