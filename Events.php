@@ -150,7 +150,8 @@ class Events extends \yii\base\Object
                     case "question":
 
                         if(isset(Yii::  $app->modules['karma'])) {
-                            Karma::addKarma('question_up_vote', $event->sender->created_by);
+                            $author = Question::findOne(['id' => $event->sender->post_id])->created_by;
+                            Karma::addKarma('question_up_vote', $author);
                         }
 
                     break;
@@ -158,7 +159,8 @@ class Events extends \yii\base\Object
                     case "answer":
 
                         if(isset(Yii::$app->modules['karma'])) {
-                            Karma::addKarma('answer_up_vote', $event->sender->created_by);
+                            $author = Answer::findOne(['id' => $event->sender->post_id])->created_by;
+                            Karma::addKarma('answer_up_vote', $author);
                         }
                     break;
 
@@ -169,7 +171,8 @@ class Events extends \yii\base\Object
             case "accepted_answer":
 
                 if(isset(Yii::$app->modules['karma'])) {
-                    Karma::addKarma('accepted_answer', $event->sender->created_by);
+                    $author = Answer::findOne(['id' => $event->sender->post_id])->created_by;
+                    Karma::addKarma('accepted_answer', $author);
                 }
 
             break;
