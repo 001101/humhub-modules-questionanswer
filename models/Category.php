@@ -43,6 +43,8 @@ class Category extends ActiveRecord
 
     const CATEGORY_NAME_POSITION = 1; // part of array that will contain the category name
 
+    const DEFAULT_CATEGORY = null; // default category to assign
+
     /**
      * @return string the associated database table name
      */
@@ -90,6 +92,13 @@ class Category extends ActiveRecord
                     $groups[$parts[self::GROUP_NAME_POSITION]][] = [
                         'space' => $category->space,
                         'name' => $parts[self::CATEGORY_NAME_POSITION],
+                        'description' => $category->space->description,
+                        'link' => $category->space->createUrl('//questionanswer/question/index')
+                    ];
+                } else {
+                    $groups[self::DEFAULT_CATEGORY][] = [
+                        'space' => $category->space,
+                        'name' => $category->space->name,
                         'description' => $category->space->description,
                         'link' => $category->space->createUrl('//questionanswer/question/index')
                     ];
