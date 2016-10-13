@@ -21,6 +21,7 @@
 namespace humhub\modules\questionanswer\models;
 
 use humhub\components\ActiveRecord;
+use humhub\models\Setting;
 use humhub\modules\content\components\ContentContainerActiveRecord;
 use humhub\modules\questionanswer\widgets\QuestionWallEntryWidget;
 use humhub\modules\user\models\User;
@@ -43,7 +44,6 @@ use yii\helpers\Url;
  * @property string $updated_at
  * @property integer $updated_by
  */
-//class Question extends HActiveRecordContentContainer implements ISearchable
 class Question extends ContentActiveRecord implements Searchable
 {
 
@@ -58,6 +58,16 @@ class Question extends ContentActiveRecord implements Searchable
      * @inheritdoc
      */
 	public $wallEntryClass = "humhub\modules\questionanswer\widgets\QuestionWallEntryWidget";
+
+	/**
+	 * @inheritdoc
+	 */
+	public function init()
+	{
+		$this->autoAddToWall = (Setting::GetText('addQuestionsToWall') == 1) ? true : false;
+		parent::init();
+	}
+
 
     /**
      * @inheritdoc

@@ -35,6 +35,12 @@ use humhub\widgets\DataSaved;
         )); ?>
 
         <div class="form-group">
+            <!-- show flash message after saving -->
+            <?php echo DataSaved::widget(); ?>
+            <?php echo $form->errorSummary($model); ?>
+        </div>
+
+        <div class="form-group">
             <p>Q&A module has two <i>modes</i>, global and spaces.</p>
             <ul>
                 <li><b>Global</b> - Is where all of the Q&A content is combined into one view on the front page (this is the default mode).</li>
@@ -42,16 +48,15 @@ use humhub\widgets\DataSaved;
             </ul>
         </div>
 
-        <div class="form-group">
-            <!-- show flash message after saving -->
-            <?php echo DataSaved::widget(); ?>
-            <?php echo $form->errorSummary($model); ?>
-        </div>
         <?php
         // Use Global Content Container?
         echo $form->field($model, 'useGlobalContentContainer')->dropDownList($options,['prompt'=>'Choose Q&A mode']);
         ?>
-        
+        <hr>
+        <?php echo $form->field($model, 'addQuestionsToWall')->checkbox(); ?>
+
+
+
         <?php echo Html::submitButton('Save', array('class' => 'btn btn-primary')); ?>
 
         <?php $form->end(); ?>

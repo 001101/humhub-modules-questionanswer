@@ -58,6 +58,7 @@ class SettingController extends \humhub\modules\admin\components\Controller
             if ($form->validate()) {
 
                 $form->useGlobalContentContainer = Setting::SetText('useGlobalContentContainer', $form->useGlobalContentContainer);
+                $form->addQuestionsToWall = Setting::SetText('addQuestionsToWall', $form->addQuestionsToWall);
 
                 // set flash message
                 Yii::$app->getSession()->setFlash('data-saved', 'Saved');
@@ -67,6 +68,7 @@ class SettingController extends \humhub\modules\admin\components\Controller
 
         } else {
             $form->useGlobalContentContainer = Setting::GetText('useGlobalContentContainer');
+            $form->addQuestionsToWall = Setting::GetText('addQuestionsToWall');
         }
 
         return $this->render('index', array(

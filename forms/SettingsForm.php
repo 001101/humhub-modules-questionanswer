@@ -30,12 +30,15 @@ class SettingsForm extends \yii\base\Model {
 
     public $useGlobalContentContainer;
 
+    public $addQuestionsToWall;
+
     /**
      * Declares the validation rules.
      */
     public function rules() {
         return array(
             array('useGlobalContentContainer', 'safe'),
+            array('addQuestionsToWall', 'safe'),
         );
     }
 
@@ -47,6 +50,7 @@ class SettingsForm extends \yii\base\Model {
     public function attributeLabels() {
         return array(
             'useGlobalContentContainer' => 'Choose Q&A Mode',
+            'addQuestionsToWall' => 'Show Questions in News Feed',
         );
     }
 
