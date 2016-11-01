@@ -195,7 +195,7 @@ class QuestionVotes extends ActiveRecord
 	 * Returns the accepted answer for a question
 	 * @param $question_id
 	 */
-	public function findAcceptedAnswer($question_id) {
+	public static function findAcceptedAnswer($question_id) {
 
 		$sql = "SELECT * FROM question_votes
 				WHERE post_id IN (SELECT id FROM question WHERE question_id = :question_id)
