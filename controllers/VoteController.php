@@ -20,11 +20,11 @@
 
 namespace humhub\modules\questionanswer\controllers;
 
+use humhub\modules\questionanswer\helpers\Url;
 use Yii;
 use humhub\components\Controller;
 use humhub\modules\questionanswer\models\QuestionVotes;
 use humhub\modules\questionanswer\models\Answer;
-use yii\helpers\Url;
 
 class VoteController extends Controller
 {
@@ -74,7 +74,7 @@ class VoteController extends Controller
 				if($_POST['QuestionVotes']['should_open_question'] || $model->vote_on == "answer") {
 					$this->redirect(array('//questionanswer/question/view','id'=>$question_id));
 				} else {
-					$this->redirect(Url::toRoute(['question/index']));
+					$this->redirect(Url::createUrl('question/index'));
 				}
 
 			}

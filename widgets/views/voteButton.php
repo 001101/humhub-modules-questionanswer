@@ -20,7 +20,7 @@
 ?>
 
 <?php $form = \yii\widgets\ActiveForm::begin([
-    'action' => \yii\helpers\Url::toRoute('vote/create')
+    'action' => \humhub\modules\questionanswer\helpers\Url::createUrl('vote/create')
 ]); ?>
     <?php if(!isset($btnClass)) $btnClass = "btn btn-default btn-xs"; ?>
     <div style="display:none;">
