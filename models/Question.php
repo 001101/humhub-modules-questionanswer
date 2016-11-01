@@ -242,7 +242,7 @@ class Question extends ContentActiveRecord implements Searchable
 
 		// Apply content filter to results
 		if($contentContainer) {
-			$criteria = "AND content.space_id = " . $contentContainer->id;
+			$criteria = "AND content.contentcontainer_id = " . $contentContainer->contentcontainer_id;
 		} else {
 			$criteria = "";
 		}
