@@ -82,7 +82,7 @@ use yii\helpers\Html;
                             <?php print Html::encode($model->post_text); ?>
                             <br /><br />
                             <?php foreach($model->tags as $tag) { ?>
-                                <span class="label label-default"><a href="<?php echo Url::createUrl('question/tag', ['id' => $tag->tag_id]); ?>"><?php echo $tag->tag->tag; ?></a></span>
+                                <span class="label label-default"><a href="<?php echo Url::createUrl('question/tag', ['id' => $tag['tag_id']]); ?>"><?php echo $tag->tag->tag; ?></a></span>
                             <?php } ?>
                             <br /><br />
                             <?php
